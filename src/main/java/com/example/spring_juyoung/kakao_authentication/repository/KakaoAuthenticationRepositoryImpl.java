@@ -37,7 +37,7 @@ public class KakaoAuthenticationRepositoryImpl implements KakaoAuthenticationRep
     }
 
     @Override
-    public Map<String, Object> getAccessToken(String code) {
+    public Map getAccessToken(String code) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
         formData.add("client_id", clientId);
@@ -55,7 +55,7 @@ public class KakaoAuthenticationRepositoryImpl implements KakaoAuthenticationRep
     }
 
     @Override
-    public Map<String, Object> getUserInfo(String accessToken) {
+    public Map getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
 
