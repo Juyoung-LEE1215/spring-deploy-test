@@ -53,7 +53,7 @@ deploy:
         cd /home/ec2-user/spring-deploy-test
         docker-compose down
 
-        echo ${{ secrets.GHCR_TOKEN}} | docker login ghcr.io -u ${{secrets.github.actor}} --password-stdin
+        echo ${{ secrets.GHCR_TOKEN}} | docker login ghcr.io -u ${{secrets.ACTOR}} --password-stdin
         docker pull ${{ env.DOCKER_IMAGE}}
 
         docker image prune -f
