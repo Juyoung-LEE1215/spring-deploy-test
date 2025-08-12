@@ -23,11 +23,12 @@ jobs:
         run: |
          echo "${{ secrets.PRODUCTION_ENV }}" > .env
       - name: Grant execute permission for gradlew
-        run:
+        run: |
           chmod +x gradlew
       - name: Build with Gradle
         run: |
-          ls ./gradlew clean build -x test
+          ls
+          ./gradlew clean build -x test
       - name: Docker build&push to prod
         run: |
           docker login ghcr.io -u ${{ secrets.ACTOR }} -p ${{ secrets.GHCR_TOKEN }}
@@ -35,28 +36,21 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile -t ghcr.io/${{ secrets.ACTOR }}/spring-backend:latest --push .
           docker logout
         
-
   deploy:
     needs: build
     name: Deploy
     runs-on: [ self-hosted, deploy-spring-test ]
     steps:
-     - name: Deploy to Prodection
-       uses: appleboy/ssh-action@v1
-       with:
-        host: ${{ secrets.HOST_IP }}
-        username: ec2-user
-        key: ${{ secrets.PRIVATE_KEY}}
-        port: 22
-        script: |
+      - name: Deploy to Production
+        run: |
+          echo "Starting Backend Production Deployment"
           cd /home/ec2-user/spring-deploy-test
           docker-compose down
-
-          echo ${{ secrets.GHCR_TOKEN}} | docker login ghcr.io -u ${{secrets.ACTOR}} --password-stdin
-          docker pull ${{ env.DOCKER_IMAGE}}
-
+  
+          echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ${{ env.DOCKER_IMAGE }}
+  
           docker image prune -f
           docker logout
-
+  
           docker-compose up -d
-      
