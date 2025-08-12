@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
 env:
   DOCKER_IMAGE: ghcr.io/${{ secrets.ACTOR }}/spring-backend:latest
 
@@ -37,27 +36,27 @@ jobs:
           docker logout
         
 
-deploy:
-  needs: build
-  name: Deploy
-  runs-on: [self-hosted, deploy-spring-test]
-  steps:
-  - name: Deploy to Prodection
-    uses: appleboy/ssh-action@v1
-    with:
-      host: ${{ secrets.HOST_IP }}
-      username: ec2-user
-      key: ${{ secrets.PRIVATE_KEY}}
-      port: 22
-      script: |
-        cd /home/ec2-user/spring-deploy-test
-        docker-compose down
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: [ self-hosted, deploy-spring-test ]
+    steps:
+     - name: Deploy to Prodection
+       uses: appleboy/ssh-action@v1
+       with:
+        host: ${{ secrets.HOST_IP }}
+        username: ec2-user
+        key: ${{ secrets.PRIVATE_KEY}}
+        port: 22
+        script: |
+          cd /home/ec2-user/spring-deploy-test
+          docker-compose down
 
-        echo ${{ secrets.GHCR_TOKEN}} | docker login ghcr.io -u ${{secrets.ACTOR}} --password-stdin
-        docker pull ${{ env.DOCKER_IMAGE}}
+          echo ${{ secrets.GHCR_TOKEN}} | docker login ghcr.io -u ${{secrets.ACTOR}} --password-stdin
+          docker pull ${{ env.DOCKER_IMAGE}}
 
-        docker image prune -f
-        docker logout
+          docker image prune -f
+          docker logout
 
-        docker-compose up -d
+          docker-compose up -d
       
